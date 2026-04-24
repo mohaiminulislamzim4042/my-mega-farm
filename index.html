@@ -695,7 +695,6 @@
             if (type === 'farm') {
                 let f = DB.farms.find(x => x.id === id);
                 let current = state.farms[id].count;
-                // সূত্র: a * (r^n - 1) / (r - 1)
                 totalCost = Math.floor(f.basePrice * (Math.pow(1.15, current) * (Math.pow(1.15, n) - 1) / (1.15 - 1)));
 
                 if (state.coins >= totalCost) {
@@ -703,24 +702,26 @@
                     state.farms[id].count += n;
                     showToast(n + (isEng ? " bought successfully!" : " টি কেনা হয়েছে!"));
                 } else {
-                    showToast(isEng ? "Not enough money! Need: " + totalCost : "টাকা নাই! লাগবে: " + totalCost.toLocaleString() + " ৳");
+                    showToast(isEng ? "Not enough money! Need: " + totalCost : "টাকা নাই! লাগবে: " + totalCost.toLocaleString());
                 }
             } else if (type === 'city') {
                 let c = DB.city.find(x => x.id === id);
                 let current = state.city[id] || 0;
+                // শহর বৃদ্ধির রেট ১.৫ (তোর কোড অনুযায়ী)
                 totalCost = Math.floor(c.basePrice * (Math.pow(1.5, current) * (Math.pow(1.5, n) - 1) / (1.5 - 1)));
 
                 if (state.coins >= totalCost) {
                     state.coins -= totalCost;
                     state.city[id] += n;
-                    showToast(isEng ? "Boosted City!" : "শহর বুস্ট করা হয়েছে!");
+                    showToast(n + (isEng ? " City Boosted!" : " বার শহর বুস্ট করা হয়েছে!"));
                 } else {
-                    showToast(isEng ? "Poor you! Need: " + totalCost : "টাকা নাই! লাগবে: " + totalCost.toLocaleString() + " ৳");
+                    showToast(isEng ? "Need: " + totalCost : "টাকা নাই! লাগবে: " + totalCost.toLocaleString());
                 }
             } else if (type === 'lab') {
                 let f = DB.farms.find(x => x.id === id);
                 let currentLvl = state.farms[id].level - 1;
                 let labBase = f.basePrice * 3;
+                // ল্যাব বৃদ্ধির রেট ২.৫
                 totalCost = Math.floor(labBase * (Math.pow(2.5, currentLvl) * (Math.pow(2.5, n) - 1) / (2.5 - 1)));
 
                 if (state.coins >= totalCost && state.farms[id].count > 0) {
@@ -728,11 +729,12 @@
                     for (let i = 0; i < n; i++) {
                         state.farms[id].level++;
                         let mi = Math.min(state.farms[id].level - 2, DB.medals.length - 1);
-                        state.farms[id].myMedals.push(DB.medals[Math.max(0, mi)]);
+                        // তোর ফাইলের অবজেক্টে নাম 'm', তাই এখানে state.farms[id].m হবে
+                        state.farms[id].m.push(DB.medals[Math.max(0, mi)]);
                     }
-                    showToast(isEng ? n + " Medals achieved!" : n + " টি মেডেল পেলি!");
+                    showToast(n + (isEng ? " Medals achieved!" : " টি মেডেল পেলি!"));
                 } else {
-                    showToast(isEng ? "Fail! Check money/farm." : "হবে না! টাকা বা খামার নাই।");
+                    showToast(isEng ? "Check money/farm count!" : "হবে না! টাকা বা খামার নাই।");
                 }
             }
             updateUI();
