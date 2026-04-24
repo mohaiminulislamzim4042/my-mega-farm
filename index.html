@@ -3,371 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>এম্পায়ার বিল্ডার - আলটিমেট</title>
+    <title>এম্পায়ার বিল্ডার - আলটিমেট এডিশন</title>
     <style>
         :root {
-            --bg-grad: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
-            --card-bg: rgba(30, 41, 59, 0.6);
-            --border: rgba(255, 255, 255, 0.1);
+            --bg: #0f172a;
+            --card: rgba(30, 41, 59, 0.7);
             --accent: #3b82f6;
             --success: #10b981;
             --gold: #fbbf24;
             --text: #f8fafc;
+            --danger: #ef4444;
         }
-        body { font-family: 'Segoe UI', Tahoma; background: var(--bg-grad); color: var(--text); margin: 0; padding-bottom: 80px; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', Tahoma; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 70px; overflow-x: hidden; }
+        .glass { background: var(--card); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; }
         
-        .glass { background: var(--card-bg); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-        
-        /* Pages */
-        .page { display: none; padding: 20px; animation: fadeIn 0.4s ease; max-width: 1200px; margin: 0 auto; }
+        /* Navigation */
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .active-page { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* UI Components */
-        input { width: 80%; max-width: 300px; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--accent); background: rgba(0,0,0,0.3); color: white; outline: none; }
-        button { background: linear-gradient(45deg, #2563eb, #7c3aed); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #1e293b; display: flex; justify-content: space-around; padding: 10px 0; border-top: 2px solid var(--accent); z-index: 100; }
+        .nav-item { cursor: pointer; font-size: 11px; text-align: center; color: #94a3b8; flex: 1; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+
+        /* UI Elements */
+        .header { position: sticky; top: 0; background: var(--bg); padding: 15px; z-index: 50; border-bottom: 1px solid #334155; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 15px; }
+        .card { padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .card h3 { margin: 5px 0; font-size: 16px; }
+        .price { color: var(--gold); font-weight: bold; font-size: 13px; }
+        
+        button { background: var(--accent); border: none; color: white; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         button:active { transform: scale(0.95); }
-        button:disabled { background: #475569; box-shadow: none; cursor: not-allowed; opacity: 0.6; }
-        
-        /* Layouts */
-        .header-stats { position: sticky; top: 0; z-index: 100; padding: 15px; display: flex; justify-content: space-around; align-items: center; border-bottom: 1px solid var(--border); border-radius: 0 0 15px 15px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
-        
-        .item-card { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; font-size: 18px; font-weight: bold; }
-        .info-row { display: flex; justify-content: space-between; font-size: 14px; color: #cbd5e1; }
-        
-        /* Navbar */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border); z-index: 1000; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); }
-        .nav-item { text-align: center; color: #94a3b8; font-size: 12px; cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: 0.3s; }
-        .nav-item.active { color: white; background: rgba(59, 130, 246, 0.3); font-weight: bold; }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 3px; }
+        button:disabled { background: #475569; opacity: 0.5; }
 
-        .toast { position: fixed; bottom: 80px; right: 20px; background: var(--success); padding: 10px 20px; border-radius: 8px; font-weight: bold; z-index: 2000; display: none; }
+        input { background: #1e293b; border: 1px solid var(--accent); color: white; padding: 10px; border-radius: 5px; width: 80%; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="page-home" class="page active-page" style="text-align: center; padding-top: 15vh;">
-        <h1 style="font-size: 40px; color: var(--gold); text-shadow: 0 0 20px rgba(251,191,36,0.4);">এম্পায়ার বিল্ডার 👑</h1>
-        <p style="color: #cbd5e1; margin-bottom: 40px;">শূন্য থেকে শুরু করে নিজের সাম্রাজ্য তৈরি কর!</p>
-        <button onclick="switchPage('page-auth')" style="font-size: 20px; padding: 15px 50px; border-radius: 30px;">খেলা শুরু কর</button>
+    <div id="page-home" class="page active-page" style="text-align: center;">
+        <h1 style="margin-top: 100px; color: var(--gold);">EMPIRE BUILDER 👑</h1>
+        <p>তোর স্বপ্নের শহর গড়ার মিশন শুরু কর।</p>
+        <button onclick="showPage('page-auth')" style="padding: 15px 40px; font-size: 18px;">শুরু করো</button>
     </div>
 
-    <div id="page-auth" class="page" style="text-align: center; padding-top: 10vh;">
-        <div class="glass" style="max-width: 400px; margin: 0 auto; padding: 30px;">
-            <h2>প্রোফাইল সেটআপ</h2>
-            <p style="font-size: 13px; color: #94a3b8;">গিটহাব ক্লাউড সেভ ব্যবহার করতে তোর ইউজারনেম আর টোকেন দে।</p>
-            <input type="text" id="inp-user" placeholder="গিটহাব ইউজারনেম (যেমন: Zim4042)">
-            <input type="password" id="inp-token" placeholder="গিটহাব এক্সেস টোকেন">
-            <button onclick="startGame()" style="width: 80%; margin-top: 20px;">লগইন করো</button>
-        </div>
+    <div id="page-auth" class="page" style="text-align: center;">
+        <h2 style="margin-top: 50px;">লগইন / সাইন-আপ</h2>
+        <input type="text" id="in-username" placeholder="গিটহাব ইউজারনেম...">
+        <input type="password" id="in-token" placeholder="গিটহাব টোকেন (অনলাইন সেভের জন্য)">
+        <p style="font-size: 12px; color: #94a3b8;">*টোকেন দিলে তোর ডেটা গিটহাবে সেভ থাকবে।</p>
+        <button onclick="initGame()" style="width: 80%;">গেম শুরু কর</button>
     </div>
 
-    <div id="page-game" style="display: none;">
-        
-        <div class="glass header-stats">
-            <div style="text-align: center;">
-                <h2 style="margin: 0; color: var(--gold); font-size: 24px;">💰 <span id="ui-coins">0</span></h2>
-                <p style="margin: 0; font-size: 12px; color: #cbd5e1;">মোট ব্যালেন্স</p>
-            </div>
-            <button onclick="manualWork()" style="padding: 15px; border-radius: 50%; font-size: 20px; box-shadow: 0 0 15px var(--accent);">⛏️</button>
-            <div style="text-align: center;">
-                <h2 style="margin: 0; color: var(--success); font-size: 24px;">⚡ <span id="ui-cps">0</span></h2>
-                <p style="margin: 0; font-size: 12px; color: #cbd5e1;">আয় / সেকেন্ড</p>
-            </div>
+    <div id="game-ui" style="display: none;">
+        <div class="header">
+            <h2 id="disp-balance" style="margin:0; color: var(--success);">💰 0</h2>
+            <p id="disp-cps" style="margin:5px 0 0; font-size: 13px; color: var(--gold);">আয়: 0/সে.</p>
         </div>
 
-        <div id="tab-farm" class="page active-page">
-            <h3 style="text-align: center; border-bottom: 2px solid var(--accent); display: inline-block; padding-bottom: 5px;">তোর খামারসমূহ</h3>
+        <div id="sec-farm" class="tab-content page active-page">
+            <h3>🌾 খামার ও উৎপাদন</h3>
             <div class="grid" id="grid-farm"></div>
         </div>
 
-        <div id="tab-city" class="page">
-            <h3 style="text-align: center; border-bottom: 2px solid var(--success); display: inline-block; padding-bottom: 5px;">শহর ও ইনফ্রাস্ট্রাকচার (গ্লোবাল বুস্ট)</h3>
+        <div id="sec-city" class="tab-content page">
+            <h3>🏢 শহর নির্মাণ (ইনকাম বুস্ট)</h3>
             <div class="grid" id="grid-city"></div>
         </div>
 
-        <div id="tab-lab" class="page">
-            <h3 style="text-align: center; border-bottom: 2px solid #a855f7; display: inline-block; padding-bottom: 5px;">রিসার্চ ও ল্যাব (ইনকাম দ্বিগুণ)</h3>
+        <div id="sec-power" class="tab-content page">
+            <h3>⚡ বিদ্যুৎ ও ইউটিলিটি</h3>
+            <div class="grid" id="grid-power"></div>
+        </div>
+
+        <div id="sec-lab" class="tab-content page">
+            <h3>🧪 ল্যাব ও আপগ্রেড</h3>
             <div class="grid" id="grid-lab"></div>
         </div>
 
-        <div id="tab-profile" class="page">
-            <div class="glass" style="padding: 20px; max-width: 500px; margin: 0 auto; text-align: center;">
-                <h2>তোর প্রোফাইল 👤</h2>
-                <p>ইউজারনেম: <strong id="ui-prof-user" style="color: var(--accent);">---</strong></p>
-                <hr style="border-color: var(--border); margin: 20px 0;">
-                
-                <button onclick="syncToCloud()" style="background: var(--success); width: 100%; margin-bottom: 15px;">☁️ গিটহাবে সেভ করো</button>
-                <button onclick="loadFromCloud()" style="background: #f59e0b; width: 100%; margin-bottom: 15px;">📥 ক্লাউড থেকে রিস্টোর করো</button>
-                <button onclick="location.reload()" style="background: #ef4444; width: 100%;">লগআউট</button>
+        <div id="sec-profile" class="tab-content page">
+            <h3>👤 তোর প্রোফাইল</h3>
+            <div class="glass card" style="text-align: left;">
+                <p>ইউজার: <span id="prof-user">---</span></p>
+                <p>মোট আর্নিং: <span id="prof-total">---</span></p>
+                <button onclick="syncGithub()" style="background: var(--success);">☁️ গিটহাবে সেভ করো</button>
+                <button onclick="location.reload()" style="background: var(--danger); margin-top: 10px;">লগআউট</button>
             </div>
         </div>
 
         <div class="nav-bar">
-            <div class="nav-item active" onclick="switchTab('farm', this)"><span class="nav-icon">🌾</span>খামার</div>
-            <div class="nav-item" onclick="switchTab('city', this)"><span class="nav-icon">🏢</span>শহর</div>
-            <div class="nav-item" onclick="switchTab('lab', this)"><span class="nav-icon">🧪</span>ল্যাব</div>
-            <div class="nav-item" onclick="switchTab('profile', this)"><span class="nav-icon">👤</span>প্রোফাইল</div>
+            <div class="nav-item active" onclick="showTab('farm', this)">🌾<br>খামার</div>
+            <div class="nav-item" onclick="showTab('city', this)">🏢<br>শহর</div>
+            <div class="nav-item" onclick="showTab('power', this)">⚡<br>বিদ্যুৎ</div>
+            <div class="nav-item" onclick="showTab('lab', this)">🧪<br>ল্যাব</div>
+            <div class="nav-item" onclick="showTab('profile', this)">👤<br>প্রোফাইল</div>
         </div>
     </div>
 
-    <div id="toast" class="toast">ম্যাসেজ</div>
-
     <script>
-        // গেম কনফিগারেশন
-        const DB = {
-            farms: [
-                { id: 'f1', name: 'মুরগির খামার', icon: '🐔', basePrice: 50, baseInc: 1 },
-                { id: 'f2', name: 'হাঁসের খামার', icon: '🦆', basePrice: 200, baseInc: 5 },
-                { id: 'f3', name: 'ছাগলের খামার', icon: '🐐', basePrice: 1000, baseInc: 25 },
-                { id: 'f4', name: 'গরুর খামার', icon: '🐄', basePrice: 5000, baseInc: 120 },
-                { id: 'f5', name: 'মাছের পুকুর', icon: '🐟', basePrice: 25000, baseInc: 600 },
-                { id: 'f6', name: 'ফলের বাগান', icon: '🍎', basePrice: 100000, baseInc: 3000 }
+        const config = {
+            farm: [
+                { id: 'chicken', name: 'মুরগি', cost: 50, inc: 1, icon: '🐔' },
+                { id: 'duck', name: 'হাঁস', cost: 200, inc: 5, icon: '🦆' },
+                { id: 'cow', name: 'গরু', cost: 1000, inc: 25, icon: '🐄' },
+                { id: 'horse', name: 'ঘোড়া', cost: 5000, inc: 120, icon: '🐎' }
             ],
             city: [
-                { id: 'c1', name: 'রাস্তাঘাট', icon: '🛣️', basePrice: 5000, boostPercent: 5, desc: 'মোট আয় ৫% বাড়বে' },
-                { id: 'c2', name: 'বিদ্যুৎ কেন্দ্র', icon: '⚡', basePrice: 20000, boostPercent: 10, desc: 'মোট আয় ১০% বাড়বে' },
-                { id: 'c3', name: 'সেন্ট্রাল মার্কেট', icon: '🏪', basePrice: 100000, boostPercent: 25, desc: 'মোট আয় ২৫% বাড়বে' }
+                { id: 'road', name: 'রাস্তা', cost: 1000, boost: 0.05, icon: '🛣️' },
+                { id: 'market', name: 'বাজার', cost: 5000, boost: 0.15, icon: '🏪' }
             ]
         };
 
-        // গেম ডেটা স্টোরেজ
         let state = {
-            user: "", token: "", coins: 100, lastSaved: Date.now(),
-            farms: {}, // { id: { count: 0, level: 1 } }
-            city: {}   // { id: count }
+            user: "", token: "", coins: 100, 
+            owned: {}, levels: {}, builds: {},
+            lastSaved: Date.now()
         };
 
-        let currentCps = 0;
-
-        // UI কন্ট্রোল ফাংশন
-        function switchPage(pageId) {
+        function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById(pageId).classList.add('active-page');
+            document.getElementById(id).classList.add('active-page');
         }
 
-        function switchTab(tabId, el) {
-            document.querySelectorAll('#page-game .page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById('tab-' + tabId).classList.add('active-page');
+        function showTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active-page'));
+            document.getElementById('sec-' + id).classList.add('active-page');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
         }
 
-        function showToast(msg) {
-            let t = document.getElementById('toast');
-            t.innerText = msg;
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
+        function initGame() {
+            state.user = document.getElementById('in-username').value || "Guest";
+            state.token = document.getElementById('in-token').value;
+            
+            // লোড ডেটা (লোকাল স্টোরেজ থেকে)
+            let saved = localStorage.getItem('empire_data_' + state.user);
+            if(saved) state = JSON.parse(saved);
+
+            showPage('game-ui');
+            document.getElementById('game-ui').style.display = 'block';
+            document.getElementById('prof-user').innerText = state.user;
+            
+            renderAll();
+            gameLoop();
         }
 
-        // ইনিশিয়ালাইজেশন
-        function startGame() {
-            let u = document.getElementById('inp-user').value.trim();
-            let t = document.getElementById('inp-token').value.trim();
-            if(!u) return alert("ভাই, ইউজারনেম দিতে হবে!");
-
-            // লোকাল স্টোরেজ চেক
-            let saved = localStorage.getItem('mega_farm_' + u);
-            if(saved) {
-                state = JSON.parse(saved);
-            } else {
-                state.user = u;
-                // ডিফল্ট সেটআপ
-                DB.farms.forEach(f => state.farms[f.id] = { count: 0, level: 1 });
-                DB.city.forEach(c => state.city[c.id] = 0);
-            }
-            if(t) state.token = t;
-
-            document.getElementById('page-home').style.display = 'none';
-            document.getElementById('page-auth').style.display = 'none';
-            document.getElementById('page-game').style.display = 'block';
-            document.getElementById('ui-prof-user').innerText = state.user;
-
-            calculateOffline();
-            updateUI();
-            setInterval(gameLoop, 1000);
-            setInterval(saveLocal, 5000);
-        }
-
-        // লজিক ক্যালকুলেশন
-        function getFarmCost(id) {
-            let f = DB.farms.find(x => x.id === id);
-            let count = state.farms[id].count;
-            return Math.floor(f.basePrice * Math.pow(1.15, count));
-        }
-
-        function getUpgCost(id) {
-            let f = DB.farms.find(x => x.id === id);
-            let level = state.farms[id].level;
-            return Math.floor(f.basePrice * 3 * Math.pow(2.5, level - 1));
-        }
-
-        function getCityCost(id) {
-            let c = DB.city.find(x => x.id === id);
-            let count = state.city[id];
-            return Math.floor(c.basePrice * Math.pow(1.5, count));
-        }
-
-        function calculateCps() {
-            let baseCps = 0;
-            DB.farms.forEach(f => {
-                let data = state.farms[f.id];
-                // লেভেল বাড়লে আয় ২ গুণ হবে
-                let inc = f.baseInc * Math.pow(2, data.level - 1);
-                baseCps += data.count * inc;
-            });
-
-            let boostPercent = 0;
-            DB.city.forEach(c => {
-                boostPercent += state.city[c.id] * c.boostPercent;
-            });
-
-            currentCps = baseCps + (baseCps * (boostPercent / 100));
-        }
-
-        // অ্যাকশন ফাংশন
-        function manualWork() {
-            let power = Math.max(1, Math.floor(currentCps * 0.1));
-            state.coins += power;
-            updateUI();
-        }
-
-        function buyFarm(id) {
-            let cost = getFarmCost(id);
-            if(state.coins >= cost) {
-                state.coins -= cost;
-                state.farms[id].count++;
-                updateUI();
-            } else showToast("টাকা নাই রে ভাই!");
-        }
-
-        function upgFarm(id) {
-            let cost = getUpgCost(id);
-            if(state.coins >= cost && state.farms[id].count > 0) {
-                state.coins -= cost;
-                state.farms[id].level++;
-                updateUI();
-                showToast("লেভেল আপ! আয় দ্বিগুণ হলো!");
-            }
-        }
-
-        function buyCity(id) {
-            let cost = getCityCost(id);
-            if(state.coins >= cost) {
-                state.coins -= cost;
-                state.city[id]++;
-                updateUI();
-                showToast("শহর উন্নত হলো! গ্লোবাল বুস্ট চালু!");
-            }
-        }
-
-        // UI আপডেট লুপ
-        function updateUI() {
-            calculateCps();
-            document.getElementById('ui-coins').innerText = Math.floor(state.coins).toLocaleString();
-            document.getElementById('ui-cps').innerText = currentCps.toLocaleString();
-
+        function renderAll() {
             // ফার্ম রেন্ডার
-            let fHtml = ''; let lHtml = '';
-            DB.farms.forEach(f => {
-                let d = state.farms[f.id];
-                let cost = getFarmCost(f.id);
-                let uCost = getUpgCost(f.id);
-                let curInc = f.baseInc * Math.pow(2, d.level - 1);
-
-                fHtml += `
-                    <div class="glass item-card">
-                        <div class="card-header"><span>${f.icon} ${f.name}</span> <span style="background:var(--accent); padding:2px 8px; border-radius:10px; font-size:12px;">${d.count} টি</span></div>
-                        <div class="info-row"><span>আয়:</span> <span>${curInc}/সে.</span></div>
-                        <button onclick="buyFarm('${f.id}')" ${state.coins < cost ? 'disabled' : ''}>কিনুন (${cost.toLocaleString()} ৳)</button>
-                    </div>`;
-
-                lHtml += `
-                    <div class="glass item-card">
-                        <div class="card-header"><span>${f.icon} ${f.name}</span> <span style="background:#a855f7; padding:2px 8px; border-radius:10px; font-size:12px;">Lvl ${d.level}</span></div>
-                        <div class="info-row"><span>পরবর্তী আয়:</span> <span>${curInc * 2}/সে.</span></div>
-                        <button onclick="upgFarm('${f.id}')" style="background: linear-gradient(45deg, #f59e0b, #ea580c);" ${state.coins < uCost || d.count === 0 ? 'disabled' : ''}>আপগ্রেড (${uCost.toLocaleString()} ৳)</button>
+            const fGrid = document.getElementById('grid-farm');
+            fGrid.innerHTML = '';
+            config.farm.forEach(item => {
+                let count = state.owned[item.id] || 0;
+                let currentCost = Math.floor(item.cost * Math.pow(1.15, count));
+                fGrid.innerHTML += `
+                    <div class="glass card">
+                        <span>${item.icon}</span>
+                        <h3>${item.name} (${count})</h3>
+                        <p class="price">${currentCost} ৳</p>
+                        <button onclick="buy('${item.id}', ${currentCost})">কেনো</button>
                     </div>`;
             });
-            document.getElementById('grid-farm').innerHTML = fHtml;
-            document.getElementById('grid-lab').innerHTML = lHtml;
 
             // সিটি রেন্ডার
-            let cHtml = '';
-            DB.city.forEach(c => {
-                let count = state.city[c.id];
-                let cost = getCityCost(c.id);
-                cHtml += `
-                    <div class="glass item-card">
-                        <div class="card-header"><span>${c.icon} ${c.name}</span> <span style="background:var(--success); padding:2px 8px; border-radius:10px; font-size:12px;">Lvl ${count}</span></div>
-                        <div class="info-row" style="color:var(--gold); font-weight:bold; text-align:center;">${c.desc}</div>
-                        <button onclick="buyCity('${c.id}')" style="background:var(--success);" ${state.coins < cost ? 'disabled' : ''}>নির্মাণ (${cost.toLocaleString()} ৳)</button>
+            const cGrid = document.getElementById('grid-city');
+            cGrid.innerHTML = '';
+            config.city.forEach(item => {
+                let count = state.builds[item.id] || 0;
+                let currentCost = Math.floor(item.cost * Math.pow(1.5, count));
+                cGrid.innerHTML += `
+                    <div class="glass card">
+                        <span>${item.icon}</span>
+                        <h3>${item.name} (Lvl ${count})</h3>
+                        <p class="price">${currentCost} ৳</p>
+                        <button onclick="build('${item.id}', ${currentCost})">নির্মাণ</button>
                     </div>`;
             });
-            document.getElementById('grid-city').innerHTML = cHtml;
         }
 
-        // কোর সিস্টেম
+        function buy(id, cost) {
+            if(state.coins >= cost) {
+                state.coins -= cost;
+                state.owned[id] = (state.owned[id] || 0) + 1;
+                renderAll();
+            }
+        }
+
+        function build(id, cost) {
+            if(state.coins >= cost) {
+                state.coins -= cost;
+                state.builds[id] = (state.builds[id] || 0) + 1;
+                renderAll();
+            }
+        }
+
         function gameLoop() {
-            if(currentCps > 0) {
-                state.coins += currentCps;
-                updateUI();
-            }
-        }
-
-        function saveLocal() {
-            state.lastSaved = Date.now();
-            localStorage.setItem('mega_farm_' + state.user, JSON.stringify(state));
-        }
-
-        function calculateOffline() {
-            let diff = Math.floor((Date.now() - state.lastSaved) / 1000);
-            if(diff > 0) {
-                calculateCps();
-                let earned = diff * currentCps;
-                if(earned > 0) {
-                    state.coins += earned;
-                    showToast(`অফলাইনে তুই ${earned.toLocaleString()} ৳ আয় করেছিস!`);
-                }
-            }
-        }
-
-        // ক্লাউড গিটহাব API
-        async function syncToCloud() {
-            if(!state.token) return showToast("আগে প্রোফাইলে গিয়ে গিটহাব টোকেন দে!");
-            showToast("গিটহাবে সেভ হচ্ছে...");
-            const url = `https://api.github.com/repos/${state.user}/my-mega-farm/contents/database.json`;
-            try {
-                const getRes = await fetch(url, { headers: { Authorization: `token ${state.token}` } });
-                const getData = await getRes.json();
-                
-                const putRes = await fetch(url, {
-                    method: "PUT",
-                    headers: { Authorization: `token ${state.token}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        message: "Cloud Save Action",
-                        content: btoa(encodeURIComponent(JSON.stringify(state))),
-                        sha: getData.sha
-                    })
+            setInterval(() => {
+                let baseInc = 0;
+                config.farm.forEach(item => {
+                    baseInc += (state.owned[item.id] || 0) * item.inc;
                 });
-                if(putRes.ok) showToast("গিটহাবে সফলভাবে সেভ হয়েছে!");
-            } catch(e) { showToast("এরর! টোকেন বা রিপোজিটরি চেক কর।"); }
+
+                let boost = 0;
+                config.city.forEach(item => {
+                    boost += (state.builds[item.id] || 0) * item.boost;
+                });
+
+                let totalInc = baseInc * (1 + boost);
+                state.coins += totalInc;
+
+                document.getElementById('disp-balance').innerText = `💰 ${Math.floor(state.coins).toLocaleString()}`;
+                document.getElementById('disp-cps').innerText = `আয়: ${totalInc.toFixed(1)}/সে.`;
+                
+                localStorage.setItem('empire_data_' + state.user, JSON.stringify(state));
+            }, 1000);
         }
 
-        async function loadFromCloud() {
-            if(!state.token) return showToast("আগে প্রোফাইলে গিয়ে গিটহাব টোকেন দে!");
-            showToast("ক্লাউড থেকে ডেটা আনা হচ্ছে...");
+        async function syncGithub() {
+            if(!state.token) return alert("টোকেন দাওনি তো!");
             const url = `https://api.github.com/repos/${state.user}/my-mega-farm/contents/database.json`;
             try {
                 const res = await fetch(url, { headers: { Authorization: `token ${state.token}` } });
                 const data = await res.json();
-                state = JSON.parse(decodeURIComponent(atob(data.content)));
-                saveLocal();
-                updateUI();
-                showToast("ডেটা সফলভাবে রিস্টোর হয়েছে!");
-            } catch(e) { showToast("কোনো ডেটা পাওয়া যায়নি!"); }
+                const put = await fetch(url, {
+                    method: "PUT",
+                    headers: { Authorization: `token ${state.token}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        message: "Cloud Save",
+                        content: btoa(JSON.stringify(state)),
+                        sha: data.sha
+                    })
+                });
+                if(put.ok) alert("ক্লাউড সেভ সফল!");
+            } catch(e) { alert("সেভ হয়নি। চেক কর সব ঠিক আছে কি না।"); }
         }
     </script>
 </body>
